@@ -27,15 +27,11 @@ public class Main {
         System.out.println("User с именем – " + user3.getName() + " добавлен в базу данных");
 
         userService.saveUser(user4.getName(), user4.getLastName(), user4.getAge());
-        System.out.println("User с именем – " + user4.getName() + " добавлен в базу данных");
+       
         userService.removeUserById(4);
         userService.getAllUsers();
 
-        System.out.println(user1);
-        System.out.println(user2);
-        System.out.println(user3);
-        System.out.println(user4);
-        System.out.println();
+
         userService.cleanUsersTable();
         userService.dropUsersTable();
     }
