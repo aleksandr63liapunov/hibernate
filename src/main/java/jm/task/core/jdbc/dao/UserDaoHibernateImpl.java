@@ -5,11 +5,13 @@ import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
     }
+
     @Override
     public void createUsersTable() {
         Session session = Util.getSessionFactory().openSession();
@@ -21,30 +23,31 @@ public class UserDaoHibernateImpl implements UserDao {
                 "age tinyint, " +
                 "PRIMARY KEY (id))").executeUpdate();
         transaction.commit();
-
+        session.close();
     }
 
     @Override
     public void dropUsersTable() {
 
         Session session = Util.getSessionFactory().openSession();
-        Transaction transaction= session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
         session.createSQLQuery("Drop table if exists users").executeUpdate();
         transaction.commit();
-
+        session.close();
     }
 
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Transaction transaction ;
-        Session session = Util.getSessionFactory().openSession() ;
-        transaction = session.beginTransaction();
-        User user=new User();
-        session.save(user);
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        session.save(new User(name, lastName, age));
         transaction.commit();
+        System.out.println("User с именем – " + name + " добавлен в базу данных");
 
+        session.close();
     }
+
 
     @Override
     public void removeUserById(long id) {
@@ -52,22 +55,43 @@ public class UserDaoHibernateImpl implements UserDao {
         Transaction transaction = session.beginTransaction();
         session.createSQLQuery("DELETE FROM users where id").executeUpdate();
         transaction.commit();
-
+        session.close();
     }
 
     @Override
     public List<User> getAllUsers() {
 
-        Session session = Util.getSessionFactory().openSession() ;
-        return session.createQuery("from User  User.class").list();
+        List<User> list = new ArrayList<>();
+        Session session = Util.getSessionFactory().openSession();
+        Transaction transaction = session.beginTransaction();
+        list = session.createCriteria(User.class).list();
+        transaction.commit();
+
+
+        return list;
     }
 
     public void cleanUsersTable() {
         Session session = Util.getSessionFactory().openSession();
-        Transaction transaction = session.beginTransaction();
-        session.createSQLQuery("DELETE FROM users").executeUpdate();
-        transaction.commit();
+        Transaction transaction = null;
+
+        transaction = session.beginTransaction();
+        final List<User> instances = session.createCriteria(User.class).list();
+
+        for (Object o : instances) {
+            session.delete(o);
+        }
+
+        session.getTransaction().commit();
+        System.out.println("Таблица очищена");
 
 
+        session.close();
     }
+
 }
+
+
+
+
+
