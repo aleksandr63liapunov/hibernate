@@ -23,7 +23,7 @@ public class UserDaoHibernateImpl implements UserDao {
                 "age tinyint, " +
                 "PRIMARY KEY (id))").executeUpdate();
         transaction.commit();
-        session.close();
+
     }
 
     @Override
@@ -45,7 +45,7 @@ public class UserDaoHibernateImpl implements UserDao {
         transaction.commit();
         System.out.println("User с именем – " + name + " добавлен в базу данных");
 
-        session.close();
+
     }
 
 
@@ -55,7 +55,7 @@ public class UserDaoHibernateImpl implements UserDao {
         Transaction transaction = session.beginTransaction();
         session.createSQLQuery("DELETE FROM users where id").executeUpdate();
         transaction.commit();
-        session.close();
+
     }
 
     @Override
@@ -72,22 +72,14 @@ public class UserDaoHibernateImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        Session session = Util.getSessionFactory().openSession();
-        Transaction transaction = null;
 
-        transaction = session.beginTransaction();
-        final List<User> instances = session.createCriteria(User.class).list();
+        Session    session = Util.getSessionFactory().getCurrentSession();
+           Transaction transaction = session.beginTransaction();
+            session.createQuery("DELETE FROM User").executeUpdate();
+            transaction.commit();
 
-        for (Object o : instances) {
-            session.delete(o);
+
         }
-
-        session.getTransaction().commit();
-        System.out.println("Таблица очищена");
-
-
-        session.close();
-    }
 
 }
 
